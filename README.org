@@ -3,5 +3,34 @@ A matrix bot for interacting with self-hosted LLMs via the ollama API.
 
 Currently a WIP.
 
+** Installation
+*** Building from source
+Clone the repo:
+#+begin_src shell
+  git clone https://github.com/tdback/llama-bot
+  cd llama-bot/
+  #+end_src
+
+And build with ~cargo~:
+#+begin_src shell
+  cargo build --release
+#+end_src
+
+Optionally, you can install the binary into ~$CARGO_HOME/bin~:
+#+begin_src shell
+  cargo install --path .
+#+end_src
+
+*** Nix
+You can build the bot with ~nix build~:
+#+begin_src shell
+  nix build
+#+end_src
+
+Or run the bot directly with ~nix run~:
+#+begin_src shell
+  nix run github:tdback/llama-bot -- <HOMESERVER> <USERNAME> <PASSWORD>
+#+end_src
+
 ** Useful Resources
 [[https://github.com/matrix-org/matrix-rust-sdk][matrix-rust-sdk]]
