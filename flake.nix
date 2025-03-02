@@ -5,10 +5,22 @@
   outputs =
     { nixpkgs, rust-overlay, ... }:
     let
-      supportedSystems = [ "x86_64-linux" ];
+      supportedSystems = [
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
       eachSystem = nixpkgs.lib.genAttrs supportedSystems;
+      forPkgs =
+        fn:
+        nixpkgs.lib.mapAttrs (system: pkgs: (fn pkgs)) (
+          nixpkgs.lib.getAttrs supportedSystems nixpkgs.legacyPackages
+        );
     in
-    {
+      {
+      packages = forPkgs (pkgs: {
+        default = pkgs.callPackage ./nix { };
+      });
+
       devShells = eachSystem (
         system:
         let
