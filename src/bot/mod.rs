@@ -15,12 +15,19 @@ use std::{collections::HashMap, str::FromStr};
 // installed anyways.
 const SUPPORTED_MODELS: [&str; 3] = ["deepseek-r1", "mistral", "llama3.2"];
 const TRIGGER: &str = "!llama";
+const USAGE: &str = r#"Usage: !llama <COMMAND>
+
+Commands:
+  ask <MODEL> <PROMPT>   Send <PROMPT> to <MODEL>. See `list` for a listing of supported models.
+  list                   List supported models.
+  help                   Display this help message.
+"#;
 
 #[derive(Debug)]
 enum Command {
-    List,
     Ask,
     Help,
+    List,
 }
 
 impl FromStr for Command {
@@ -31,7 +38,10 @@ impl FromStr for Command {
             "ask" => Ok(Command::Ask),
             "help" => Ok(Command::Help),
             "list" => Ok(Command::List),
-            _ => Err(s.to_string()),
+            _ => Err(format!(
+                "{} is not a valid command. Run `!llama help` for a list of valid commands.",
+                s
+            )),
         }
     }
 }
@@ -50,16 +60,15 @@ impl Command {
                             let payload = HashMap::from([("model", &model), ("prompt", &prompt)]);
                             &query_api(&api, &payload).await?
                         } else {
-                            &format!("{} is an unsupported model. run `!llama list` to get a list of supported models.", &model)
+                            &format!("{} is an unsupported model. Run `!llama list` for a list of supported models.", &model)
                         }
                     }
-                    None => &format!("please provide a model and a prompt."),
+                    None => &format!("Please provide a model and a prompt."),
                 },
-                None => &format!("please provide a model and a prompt."),
+                None => &format!("Please provide a model and a prompt."),
             },
-            Command::List => &format!("supported models: {}", SUPPORTED_MODELS.join(", ")),
-            // TODO: Obviously this won't fly in prod.
-            Command::Help => "sounds like a skill issue",
+            Command::List => &format!("Supported models: {}", SUPPORTED_MODELS.join(", ")),
+            Command::Help => USAGE,
         };
 
         Ok(RoomMessageEventContent::text_plain(&*msg))
@@ -129,10 +138,7 @@ async fn on_room_message(
 
     let message = match command.parse::<Command>() {
         Ok(cmd) => cmd.run(&api, data).await?,
-        Err(e) => RoomMessageEventContent::text_plain(format!(
-            "{} is not a supported command. you can list all commands with `!llama help`",
-            e
-        )),
+        Err(e) => RoomMessageEventContent::text_plain(e),
     };
 
     room.send(message).await?;
