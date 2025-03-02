@@ -1,0 +1,7 @@
+* llama-bot
+A matrix bot for interacting with self-hosted LLMs via the ollama API.
+
+Currently a WIP.
+
+** Useful Resources
+[[https://github.com/matrix-org/matrix-rust-sdk][matrix-rust-sdk]]
